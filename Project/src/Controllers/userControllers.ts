@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { User } from '../models';
-import {Thought} from '../models';
+import Thought from '../models/Thought.js';
+import User from '../models/User.js';
+
 
 // get users
 export const getAllUsers = async (_req: Request, res: Response) => {
@@ -52,13 +53,25 @@ export const updateUser = async (req: Request, res: Response): Promise<Response 
 export const deleteUser = async (req: Request, res: Response): Promise<Response | void> => {
   try {
     const user = await User.findByIdAndDelete(req.params.userId);
+    
     if (!user) {
       return res.status(404).json({ message: 'No user found with this ID' });
     }
-    await Thought.deleteMany({ userId: user._id });
-    res.status(200).json({ message: 'User and associated thoughts deleted' });
+
+    // delete all thoughts with user
+    const deletedThoughts = await Thought.deleteMany({ userId: user._id });
+    
+    if (deletedThoughts.deletedCount === 0) {
+      return res.status(404).json({ message: 'User found, but no associated thoughts to delete' });
+    }
+
+    res.status(200).json({
+      message: 'User and associated thoughts deleted',
+      deletedUser: user,
+      deletedThoughtsCount: deletedThoughts.deletedCount
+    });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({ message: 'Error deleting user and thoughts', error: err });
   }
 };
 

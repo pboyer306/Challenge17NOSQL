@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import { Thought, User } from '../models';
+import Thought from '../models/Thought.js';
+import User from '../models/User.js';
+
 
 // gets thoughts
 export const getAllThoughts = async (_req: Request, res: Response) => {
@@ -38,13 +40,25 @@ export const createThought = async (req: Request, res: Response) => {
 // update thought by ID
 export const updateThought = async (req: Request, res: Response): Promise<Response | void> => {
   try {
-    const thought = await Thought.findByIdAndUpdate(req.params.thoughtId, req.body, { new: true });
-    if (!thought) {
+    // Ensure the 'text' field is included in the request body
+    if (!req.body.text) {
+      return res.status(400).json({ message: 'Text is required for update' });
+    }
+
+    // update thought by ID
+    const updatedThought = await Thought.findByIdAndUpdate(
+      req.params.thoughtId,
+      { text: req.body.text },
+      { new: true }
+    );
+
+    if (!updatedThought) {
       return res.status(404).json({ message: 'No thought found with this ID' });
     }
-    res.status(200).json(thought);
+
+    res.status(200).json(updatedThought);
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({ message: 'Error updating thought', error: err });
   }
 };
 

@@ -1,4 +1,4 @@
-import * as thoughtController from './thoughtControllers';
-import * as userController from './userControllers';
+import * as thoughtController from './thoughtControllers.js';
+import * as userController from './userControllers.js';
 
 export { thoughtController, userController };
