@@ -40,15 +40,9 @@ export const createThought = async (req: Request, res: Response) => {
 // update thought by ID
 export const updateThought = async (req: Request, res: Response): Promise<Response | void> => {
   try {
-    // Ensure the 'text' field is included in the request body
-    if (!req.body.text) {
-      return res.status(400).json({ message: 'Text is required for update' });
-    }
-
-    // update thought by ID
     const updatedThought = await Thought.findByIdAndUpdate(
       req.params.thoughtId,
-      { text: req.body.text },
+      { thoughtText: req.body.thoughtText },
       { new: true }
     );
 
